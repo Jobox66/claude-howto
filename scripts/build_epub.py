@@ -17,7 +17,7 @@ Usage:
         --root, -r      Root directory containing markdown files (default: repo root)
         --output, -o    Output EPUB file path (default: <root>/claude-howto-guide.epub)
         --verbose, -v   Enable verbose logging
-        --lang          Language tree to build: en, vi, zh, ja, ko or fa (default: en)
+        --lang          Language tree to build: en or vi (default: en)
 
     The script uses inline script dependencies (PEP 723), so uv will
     automatically install required packages in an isolated environment.
@@ -608,8 +608,9 @@ class ChapterCollector:
 
         for i, (file_path, file_title) in enumerate(folder_files):
             chapter_filename = f"chap_{chapter_num:02d}_{i:02d}.xhtml"
-            rel_path = str(file_path.relative_to(self.root_path))
-            self.state.path_to_chapter[rel_path] = chapter_filename
+            rel_path = file_path.relative_to(self.root_path)
+            self.state.path_to_chapter[rel_path.as_posix()] = chapter_filename
+            self.state.path_to_chapter[str(rel_path)] = chapter_filename
 
             chapters.append(
                 ChapterInfo(
@@ -1177,11 +1178,10 @@ def main() -> int:
         "--lang",
         type=str,
         default="en",
-        choices=["en", "vi", "zh", "ja", "ko", "fa"],
+        choices=["en", "vi"],
         help=(
-            "Language code: 'en' for English, 'vi' for Vietnamese, "
-            "'zh' for Chinese, 'ja' for Japanese, 'ko' for Korean, "
-            "'fa' for Persian (default: en)"
+            "Language code: 'en' for English, 'vi' for Vietnamese "
+            "(default: en)"
         ),
     )
 
@@ -1196,10 +1196,6 @@ def main() -> int:
     lang_map: dict[str, tuple[Path, str, str]] = {
         "en": (repo_root, "claude-howto-guide.epub", EPUBConfig.en_title),
         "vi": (repo_root / "vi", "claude-howto-guide-vi.epub", EPUBConfig.vi_title),
-        "zh": (repo_root / "zh", "claude-howto-guide-zh.epub", EPUBConfig.zh_title),
-        "ja": (repo_root / "ja", "claude-howto-guide-ja.epub", EPUBConfig.ja_title),
-        "ko": (repo_root / "ko", "claude-howto-guide-ko.epub", EPUBConfig.ko_title),
-        "fa": (repo_root / "fa", "claude-howto-guide-fa.epub", EPUBConfig.fa_title),
     }
     root, default_output_name, title = lang_map[args.lang]
     output = args.output or (repo_root / default_output_name)

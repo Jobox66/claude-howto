@@ -36,7 +36,7 @@ def check_translation_status(
     en_files = [
         f
         for f in root_path.rglob("*.md")
-        if "vi/" not in str(f) and ".claude" not in str(f)
+        if "vi" not in f.parts and ".claude" not in f.parts
     ]
 
     # Get all Vietnamese markdown files
